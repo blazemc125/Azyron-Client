@@ -120,6 +120,12 @@ jobs:
             msg=$(printf '%s' "$line" | tr -d '\r' | sed 's/%/%25/g' | cut -c1-280)
             echo "::error title=MC ${{ matrix.minecraft }} #$n::$msg"
           done < <(grep -E "error:|Execution failed|What went wrong|Caused by|^e: " "$LOG" | head -20)
+          # Full javac diagnostics (file:line + the following 'symbol:'/'location:'
+          # lines) as one annotation, so the exact broken call sites are visible.
+          ctx=$(grep -A3 -E "^/home/runner/.*\.java:[0-9]+: error:" "$LOG" | head -60 | tr -d '\r' | sed 's/%/%25/g' | paste -sd'|' - | cut -c1-6000)
+          if [ -n "$ctx" ]; then
+            echo "::error title=MC ${{ matrix.minecraft }} javac detail::$ctx"
+          fi
 
       - name: Validate produced jar (entrypoints, mixins, icon, metadata)
         if: success()
