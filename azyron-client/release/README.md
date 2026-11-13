@@ -19,19 +19,40 @@ The fastest path to a downloadable jar is the **pre-release** job:
 
 1. Actions → **AZYRON CLIENT V3 Build** → **Run workflow**.
 2. Set `publish` to **prerelease**, keep the branch you want to build.
-3. Wait for the four build jobs, then the `Publish v3.0.0-pre pre-release` job.
+3. Wait for the four build jobs, then the `Publish v3.0.0-beta.1 pre-release` job.
 4. The jars appear at:
 
    ```
-   https://github.com/blazemc125/Azyron-Client/releases/tag/v3.0.0-pre
+   https://github.com/blazemc125/Azyron-Client/releases/tag/v3.0.0-beta.1
    ```
 
 That job refuses to publish unless all four matrix builds passed, refuses
 anything that is not a shippable jar (`-sources` / `-dev` are skipped), runs
 `docs/validate-jar.py` on each jar, requires exactly four jars, and will not
-overwrite an existing `v3.0.0-pre` — delete the old one first.
+overwrite an existing `v3.0.0-beta.1` — delete the old one first.
 
 It is a **pre-release**: untested in-game, so it is not announced as 3.0.0.
+
+### Publishing by hand instead
+
+If the Actions token is not allowed to write, create the same release
+locally after downloading the four jars:
+
+```sh
+gh release create v3.0.0-beta.1 \
+  --repo blazemc125/Azyron-Client \
+  --target <commit-sha> \
+  --prerelease \
+  --title "AZYRON CLIENT V3 v3.0.0-beta.1 - Beta 1" \
+  --notes-file azyron-client/release/RELEASE-BODY.md \
+  azyron-client-1.21.11-3.0.0.jar azyron-client-26.1-3.0.0.jar \
+  azyron-client-26.2-3.0.0.jar azyron-client-26.3-3.0.0.jar
+```
+
+Editing later: open the release page → pencil icon for the notes, or
+*Edit release* for the title/tag; the *Pre-release* checkbox is on that same
+form, and unticking it promotes the release to a full (Latest) release.
+Assets are managed with *Edit release* → drag files in / the X to remove.
 
 If `publish` stays `none` (the default), the workflow only builds and uploads
 run artifacts, exactly as before.

@@ -11,7 +11,7 @@
 # This workflow does not modify or replace any other workflow in this
 # repository. Artifacts are always downloadable from the run page. In
 # addition, a manual "Run workflow" with publish=prerelease creates a GitHub
-# PRE-RELEASE tagged v3.0.0-pre and attaches the four jars. That publish job
+# PRE-RELEASE tagged v3.0.0-beta.1 and attaches the four jars. That publish job
 # only runs on workflow_dispatch - a push or pull request never publishes.
 
 name: AZYRON CLIENT V3 Build
@@ -28,7 +28,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: 'Publish a v3.0.0-pre pre-release with the built jars'
+        description: 'Publish a v3.0.0-beta.1 pre-release with the built jars'
         type: choice
         options:
           - 'none'
@@ -162,7 +162,7 @@ jobs:
   # A push or pull request can never reach this job.
   # ---------------------------------------------------------------------
   prerelease:
-    name: Publish v3.0.0-pre pre-release
+    name: Publish v3.0.0-beta.1 pre-release
     needs: build
     if: >-
       github.event_name == 'workflow_dispatch' &&
@@ -209,7 +209,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          TAG="v3.0.0-pre"
+          TAG="v3.0.0-beta.1"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "::error::Release $TAG already exists. Delete it in the Releases"
             echo "::error::page before running this again - this job never overwrites."
@@ -219,7 +219,7 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --prerelease \
-            --title "AZYRON CLIENT V3 - pre-release (untested build)" \
+            --title "AZYRON CLIENT V3 v3.0.0-beta.1 - Beta 1" \
             --notes-file azyron-client/release/PRE-RELEASE-NOTES.md \
             release-assets/*.jar
           echo "### Pre-release published" >> "$GITHUB_STEP_SUMMARY"

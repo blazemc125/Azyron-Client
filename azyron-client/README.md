@@ -72,7 +72,7 @@ from CI into the profile's `mods/` folder and launch.
 
 **Downloading a build:** run Actions → *AZYRON CLIENT V3 Build* → *Run
 workflow* with `publish = prerelease`, and the four jars are attached to
-[`releases/tag/v3.0.0-pre`](https://github.com/blazemc125/Azyron-Client/releases/tag/v3.0.0-pre).
+[`releases/tag/v3.0.0-beta.1`](https://github.com/blazemc125/Azyron-Client/releases/tag/v3.0.0-beta.1).
 That tag only exists after a green run — see `release/PRE-RELEASE-NOTES.md`
 for what the pre-release does and does not promise.
 
