@@ -108,6 +108,13 @@ jobs:
               grep -E "error:|warning: \[|Execution failed|What went wrong|Caused by|^e: |FAILURE:|BUILD SUCCESSFUL|BUILD FAILED" \
                 "build-${{ matrix.minecraft }}.log" | head -40 || echo "(no compiler errors matched)"
               echo '```'
+              # Also emit each diagnostic as a check-run annotation, which the
+              # GitHub API exposes programmatically (the step summary does not).
+              grep -E "error:|Execution failed|Caused by|^e: |What went wrong" \
+                "build-${{ matrix.minecraft }}.log" | head -20 | while IFS= read -r line; do
+                  clean=$(printf '%s' "$line" | tr -d '\r' | sed 's/%/%25/g; s/\r//g' | cut -c1-300)
+                  echo "::error title=MC ${{ matrix.minecraft }}::$clean"
+                done
             else
               echo "_no build log produced_"
             fi
