@@ -101,25 +101,25 @@ jobs:
       - name: Show build result in run summary
         if: always()
         run: |
+          LOG="build-${{ matrix.minecraft }}.log"
+          if [ ! -f "$LOG" ]; then
+            echo "::error title=MC ${{ matrix.minecraft }}::no build log was produced"
+            exit 0
+          fi
           {
             echo "### MC ${{ matrix.minecraft }} (Java ${{ matrix.java }})"
-            if [ -f "build-${{ matrix.minecraft }}.log" ]; then
-              echo '```'
-              grep -E "error:|warning: \[|Execution failed|What went wrong|Caused by|^e: |FAILURE:|BUILD SUCCESSFUL|BUILD FAILED" \
-                "build-${{ matrix.minecraft }}.log" | head -40 || echo "(no compiler errors matched)"
-              echo '```'
-              # Also emit each diagnostic as a check-run annotation, which the
-              # GitHub API exposes programmatically (the step summary does not).
-              grep -E "error:|Execution failed|Caused by|^e: |What went wrong" \
-                "build-${{ matrix.minecraft }}.log" | head -20 | while IFS= read -r line; do
-                  clean=$(printf '%s' "$line" | tr -d '\r' | sed 's/%/%25/g; s/\r//g' | cut -c1-300)
-                  echo "::error title=MC ${{ matrix.minecraft }}::$clean"
-                done
-            else
-              echo "_no build log produced_"
-            fi
+            echo '```'
+            grep -E "error:|Execution failed|What went wrong|Caused by|^e: |FAILURE:|BUILD SUCCESSFUL|BUILD FAILED" "$LOG" | head -40 || echo "(no diagnostics matched)"
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
+          # Annotations are emitted to stdout (NOT into the summary file) so the
+          # GitHub API can read the compiler diagnostics back.
+          n=0
+          while IFS= read -r line; do
+            n=$((n + 1))
+            msg=$(printf '%s' "$line" | tr -d '\r' | sed 's/%/%25/g' | cut -c1-280)
+            echo "::error title=MC ${{ matrix.minecraft }} #$n::$msg"
+          done < <(grep -E "error:|Execution failed|What went wrong|Caused by|^e: " "$LOG" | head -20)
 
       - name: Validate produced jar (entrypoints, mixins, icon, metadata)
         if: success()
