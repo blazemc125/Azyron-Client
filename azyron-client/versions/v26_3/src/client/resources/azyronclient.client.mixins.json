@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.azyron.client.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"TitleScreenMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

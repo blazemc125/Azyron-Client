@@ -1,0 +1,9 @@
+// AZYRON CLIENT V3 - multi-version Fabric build
+// Each :versions:* project is an independent Fabric mod build for its Minecraft version.
+// Shared code lives in common/ and is compiled into each version jar.
+
+subprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+}

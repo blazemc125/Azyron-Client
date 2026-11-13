@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "azyronclient",
+	"version": "${version}",
+	"name": "AZYRON CLIENT V3",
+	"description": "AZYRON CLIENT V3 - premium multi-version Minecraft Java client by JIGNESH GAMING. FPS HUD suite (FPS, CPS, ping, coordinates, keystrokes, armor), auto sprint, one-click low-graphics optimizer, FPS BOOST profiles and a custom AZYRON interface, built for PojavLauncher and low-end devices.",
+	"authors": [
+		"JIGNESH GAMING"
+	],
+	"contact": {
+		"sources": "https://github.com/blazemc125/Azyron-Client"
+	},
+	"license": "MIT",
+	"icon": "assets/azyronclient/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			"com.azyron.client.client.AzyronCommonEntrypoint"
+		],
+		"client": [
+			"com.azyron.client.flavor.AzyronClientEntrypoint"
+		]
+	},
+	"mixins": [
+		{
+			"config": "azyronclient.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

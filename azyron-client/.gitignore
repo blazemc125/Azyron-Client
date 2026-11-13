@@ -1,0 +1,13 @@
+.gradle/
+build/
+out/
+run/
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+# local build/CI artifacts that should never be committed
+build-*.log
+versions/*/build/
+common/build/

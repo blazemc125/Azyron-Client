@@ -1,0 +1,28 @@
+# AZYRON CLIENT V3 modpack — Minecraft 1.21.11
+# Target: vanilla Minecraft 1.21.11 + Fabric Loader 0.20.1 (+ Fabric API listed below)
+# Java: 21
+# The AZYRON CLIENT V3 jar itself is built from this repository (see ../../release/1.21.11/).
+
+minecraft=1.21.11
+loader=fabric
+loader_version=0.20.1
+java_version=21
+fabric_api=0.141.6+1.21.11
+
+# Performance mods (fetched from Modrinth at install time by modpack/_shared/fetch-mods.sh).
+# slug|channel|pin-notes
+sodium|recommended|upstream stable tag for 1.21.11 is mc1.21.11-0.8.14 (2026-08-28); pin it if you want reproducibility
+lithium|recommended|
+ferrite-core|recommended|
+immediatelyfast|recommended|
+entityculling|recommended|
+moreculling|recommended|
+dynamic-fps|recommended|
+#
+# ModernFix is INTENTIONALLY OMITTED: no Fabric builds exist for 1.21.11
+# (verified 2026-11-13). Do not add it by hand.
+#
+# Sodium notes: Sodium for 1.21.11 is published for the exact 1.21.11 game
+# version; if Modrinth lists only beta builds for your exact game version,
+# the fetch script will take the newest compatible build. Verify the game
+# launches after installing.

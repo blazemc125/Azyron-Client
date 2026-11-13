@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'azyron-client'
+
+include ':versions:v1_21_11'
+include ':versions:v26_1'
+include ':versions:v26_2'
+include ':versions:v26_3'

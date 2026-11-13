@@ -1,0 +1,145 @@
+# AZYRON CLIENT V3 - per-version Fabric build + validation
+#
+# Builds one genuine remapped mod jar per supported Minecraft version:
+#   1.21.11 (Java 21), 26.1 / 26.2 / 26.3 (Java 25)
+#
+# Each jar is produced by Fabric Loom from the exact sources in this
+# repository - nothing is downloaded pre-built except Minecraft, Fabric
+# Loader, Fabric API and Loom's own toolchain (all via maven.fabricmc.net /
+# Mojang). Build logs are uploaded as workflow artifacts.
+#
+# This workflow does not modify or replace any other workflow in this
+# repository and does not create releases; artifacts can be downloaded from
+# the workflow run page.
+
+name: AZYRON CLIENT V3 Build
+
+on:
+  push:
+    paths:
+      - 'azyron-client/**'
+      - '.github/workflows/azyron-build.yml'
+  pull_request:
+    paths:
+      - 'azyron-client/**'
+      - '.github/workflows/azyron-build.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: azyron-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build MC ${{ matrix.minecraft }} (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - minecraft: '1.21.11'
+            java: '21'
+            project: 'v1_21_11'
+          - minecraft: '26.1'
+            java: '25'
+            project: 'v26_1'
+          - minecraft: '26.2'
+            java: '25'
+            project: 'v26_2'
+          - minecraft: '26.3'
+            java: '25'
+            project: 'v26_3'
+
+    defaults:
+      run:
+        working-directory: azyron-client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Temurin JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: gradle
+          # setup-java hashes these files to build the cache key; it fails the
+          # step if the glob matches no file, so list the real build files.
+          cache-dependency-path: |
+            azyron-client/gradle/wrapper/gradle-wrapper.properties
+            azyron-client/settings.gradle
+            azyron-client/build.gradle
+            azyron-client/gradle.properties
+            azyron-client/versions/*/build.gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Build (:versions:${{ matrix.project }})
+        id: build
+        run: |
+          set -o pipefail
+          ./gradlew ":versions:${{ matrix.project }}:build" --console=plain --stacktrace 2>&1 | tee "build-${{ matrix.minecraft }}.log"
+
+      - name: Validate produced jar (entrypoints, mixins, icon, metadata)
+        if: success()
+        run: |
+          python3 - <<'EOF'
+          import json
+          import pathlib
+          import sys
+          import zipfile
+
+          libs = sorted(pathlib.Path("versions").glob("**/build/libs/*.jar"))
+          remapped = [p for p in libs if "-sources" not in p.name and "-dev" not in p.name]
+          if not remapped:
+              sys.exit("No remapped mod jar found under versions/**/build/libs")
+          jar = remapped[0]
+          print("Validating", jar)
+          with zipfile.ZipFile(jar) as zf:
+              names = set(zf.namelist())
+              required = [
+                  "fabric.mod.json",
+                  "azyronclient.client.mixins.json",
+                  "assets/azyronclient/icon.png",
+                  "com/azyron/client/client/AzyronCommonEntrypoint.class",
+                  "com/azyron/client/client/AzyronSharedInit.class",
+              ]
+              for entry in required:
+                  if entry not in names:
+                      sys.exit(f"MISSING in jar: {entry}")
+              meta = json.loads(zf.read("fabric.mod.json"))
+              mixin = json.loads(zf.read("azyronclient.client.mixins.json"))
+              if meta.get("id") != "azyronclient":
+                  sys.exit("fabric.mod.json mod id mismatch")
+              print(f"mod id={meta['id']} version={meta['version']} depends={meta.get('depends')}")
+              print("mixins:", mixin.get("client"), "compatibilityLevel:", mixin.get("compatibilityLevel"))
+              bad = zf.testzip()
+              if bad is not None:
+                  sys.exit(f"Corrupt zip entry: {bad}")
+          print("VALIDATION OK:", jar)
+          EOF
+
+      - name: Upload mod jar
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: azyron-client-${{ matrix.minecraft }}
+          path: |
+            azyron-client/versions/${{ matrix.project }}/build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: azyron-build-log-${{ matrix.minecraft }}
+          path: azyron-client/build-${{ matrix.minecraft }}.log
+          if-no-files-found: ignore
+          retention-days: 30
