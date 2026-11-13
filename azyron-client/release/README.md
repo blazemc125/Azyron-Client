@@ -33,6 +33,15 @@ overwrite an existing `v3.0.0-beta.1` — delete the old one first.
 
 It is a **pre-release**: untested in-game, so it is not announced as 3.0.0.
 
+### Publishing from jars you built yourself
+
+Put the four jars in `/home/user/release-assets/`, then run
+`bash /home/user/publish-release.sh`. It validates every jar with
+`docs/validate-jar.py`, aborts on anything that is not a real AZYRON mod jar
+(no placeholders, no renamed `-dev`/`-sources` files), refuses to overwrite an
+existing release, creates the pre-release, and verifies the page returns 200
+before printing the URL.
+
 ### Publishing by hand instead
 
 If the Actions token is not allowed to write, create the same release
