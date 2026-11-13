@@ -1,6 +1,7 @@
 package com.azyron.client.client.mixin;
 
 import com.azyron.client.client.screens.AzyronHomeScreen;
+import com.azyron.client.flavor.ui.Navigation;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -24,7 +25,7 @@ public abstract class TitleScreenMixin extends Screen {
 	@Inject(method = "init()V", at = @At("TAIL"))
 	private void azyron$addEntryButton(CallbackInfo ci) {
 		this.addRenderableWidget(Button.builder(Component.literal("AZYRON V3"),
-					button -> this.minecraft.setScreen(new AzyronHomeScreen()))
+					button -> Navigation.open(this.minecraft, new AzyronHomeScreen()))
 				.pos(8, 8)
 				.size(96, 20)
 				.build());

@@ -5,6 +5,7 @@ import com.azyron.client.client.AzyronUi;
 import com.azyron.client.common.AzyronConstants;
 import com.azyron.client.common.FpsBoostProfile;
 import com.azyron.client.flavor.screen.BaseAzyronScreen;
+import com.azyron.client.flavor.ui.Navigation;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -47,35 +48,35 @@ public final class AzyronHomeScreen extends BaseAzyronScreen {
 
 		this.boostButton = this.addRenderableWidget(Button.builder(
 				Component.literal("FPS BOOST"),
-				button -> this.minecraft.setScreen(new FpsBoostScreen()))
+				button -> Navigation.open(this.minecraft, new FpsBoostScreen()))
 				.pos(this.navX + 5, this.navY)
 				.size(this.navWidth - 10, buttonHeight)
 				.build());
 
 		this.hudEditButton = this.addRenderableWidget(Button.builder(
 				Component.literal("HUD LAYOUT"),
-				button -> this.minecraft.setScreen(new HudEditScreen()))
+				button -> Navigation.open(this.minecraft, new HudEditScreen()))
 				.pos(this.navX + 5, this.navY + step)
 				.size(this.navWidth - 10, buttonHeight)
 				.build());
 
 		this.hudSettingsButton = this.addRenderableWidget(Button.builder(
 				Component.literal("HUD SETTINGS"),
-				button -> this.minecraft.setScreen(new HudSettingsScreen()))
+				button -> Navigation.open(this.minecraft, new HudSettingsScreen()))
 				.pos(this.navX + 5, this.navY + step * 2)
 				.size(this.navWidth - 10, buttonHeight)
 				.build());
 
 		this.versionsButton = this.addRenderableWidget(Button.builder(
 				Component.literal("VERSIONS"),
-				button -> this.minecraft.setScreen(new VersionSelectScreen()))
+				button -> Navigation.open(this.minecraft, new VersionSelectScreen()))
 				.pos(this.navX + 5, this.navY + step * 3)
 				.size(this.navWidth - 10, buttonHeight)
 				.build());
 
 		this.clientSettingsButton = this.addRenderableWidget(Button.builder(
 				Component.literal("CLIENT SETTINGS"),
-				button -> this.minecraft.setScreen(new ClientSettingsScreen()))
+				button -> Navigation.open(this.minecraft, new ClientSettingsScreen()))
 				.pos(this.navX + 5, this.navY + step * 4)
 				.size(this.navWidth - 10, buttonHeight)
 				.build());

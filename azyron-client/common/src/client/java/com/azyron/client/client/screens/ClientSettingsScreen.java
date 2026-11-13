@@ -5,6 +5,7 @@ import com.azyron.client.client.AzyronUi;
 import com.azyron.client.common.AzyronConstants;
 import com.azyron.client.common.FpsBoostProfile;
 import com.azyron.client.flavor.screen.BaseAzyronScreen;
+import com.azyron.client.flavor.ui.Navigation;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
@@ -54,7 +55,7 @@ public final class ClientSettingsScreen extends BaseAzyronScreen {
 
 		this.backButton = this.addRenderableWidget(Button.builder(
 				Component.literal("BACK"),
-				button -> this.minecraft.setScreen(new AzyronHomeScreen()))
+				button -> Navigation.open(this.minecraft, new AzyronHomeScreen()))
 				.pos(this.width - 82, this.height - 32)
 				.size(70, 18)
 				.build());

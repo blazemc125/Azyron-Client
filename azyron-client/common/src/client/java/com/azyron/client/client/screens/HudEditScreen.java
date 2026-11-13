@@ -7,6 +7,7 @@ import com.azyron.client.common.ColorUtil;
 import com.azyron.client.common.HudElementConfig;
 import com.azyron.client.common.HudElementSizes;
 import com.azyron.client.flavor.screen.BaseAzyronScreen;
+import com.azyron.client.flavor.ui.Navigation;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
@@ -39,7 +40,7 @@ public final class HudEditScreen extends BaseAzyronScreen {
 	@Override
 	public void onClose() {
 		AzyronClientState.get().saveConfig();
-		this.minecraft.setScreen(new HudSettingsScreen());
+		Navigation.open(this.minecraft, new HudSettingsScreen());
 	}
 
 	@Override

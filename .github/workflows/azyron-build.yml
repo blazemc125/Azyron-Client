@@ -46,24 +46,32 @@ permissions:
 
 jobs:
   build:
-    name: Build MC ${{ matrix.minecraft }} (Java ${{ matrix.java }})
+    name: Build MC ${{ matrix.minecraft }} (JDK ${{ matrix.toolchain }}, mod Java ${{ matrix.mod_java }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
+          # toolchain: the JDK that runs Gradle. Fabric Loom 1.19.4 is compiled
+          # for Java 25, so the build JVM must be 25 even for the 1.21.11
+          # flavor (that flavor still emits Java 21 mod bytecode via
+          # options.release = 21).
           - minecraft: '1.21.11'
-            java: '21'
+            toolchain: '25'
+            mod_java: '21'
             project: 'v1_21_11'
           - minecraft: '26.1'
-            java: '25'
+            toolchain: '25'
+            mod_java: '25'
             project: 'v26_1'
           - minecraft: '26.2'
-            java: '25'
+            toolchain: '25'
+            mod_java: '25'
             project: 'v26_2'
           - minecraft: '26.3'
-            java: '25'
+            toolchain: '25'
+            mod_java: '25'
             project: 'v26_3'
 
     defaults:
@@ -74,11 +82,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Temurin JDK ${{ matrix.java }}
+      - name: Set up Temurin JDK ${{ matrix.toolchain }}
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{ matrix.java }}
+          java-version: ${{ matrix.toolchain }}
           cache: gradle
           # setup-java hashes these files to build the cache key; it fails the
           # step if the glob matches no file, so list the real build files.
@@ -107,7 +115,7 @@ jobs:
             exit 0
           fi
           {
-            echo "### MC ${{ matrix.minecraft }} (Java ${{ matrix.java }})"
+            echo "### MC ${{ matrix.minecraft }} (JDK ${{ matrix.toolchain }}, mod Java ${{ matrix.mod_java }})"
             echo '```'
             grep -E "error:|Execution failed|What went wrong|Caused by|^e: |FAILURE:|BUILD SUCCESSFUL|BUILD FAILED" "$LOG" | head -40 || echo "(no diagnostics matched)"
             echo '```'

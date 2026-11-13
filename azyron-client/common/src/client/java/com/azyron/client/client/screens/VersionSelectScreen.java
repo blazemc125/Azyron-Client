@@ -4,6 +4,7 @@ import com.azyron.client.client.AzyronClientState;
 import com.azyron.client.client.AzyronUi;
 import com.azyron.client.common.AzyronConstants;
 import com.azyron.client.flavor.screen.BaseAzyronScreen;
+import com.azyron.client.flavor.ui.Navigation;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -35,7 +36,7 @@ public final class VersionSelectScreen extends BaseAzyronScreen {
 	protected void init() {
 		this.backButton = this.addRenderableWidget(Button.builder(
 				Component.literal("BACK"),
-				button -> this.minecraft.setScreen(new AzyronHomeScreen()))
+				button -> Navigation.open(this.minecraft, new AzyronHomeScreen()))
 				// height - 32 keeps the button clear of the footer line at height - 12.
 				.pos(this.width / 2 - 40, this.height - 32)
 				.size(80, 18)

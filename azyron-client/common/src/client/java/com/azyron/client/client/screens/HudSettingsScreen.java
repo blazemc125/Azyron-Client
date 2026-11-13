@@ -7,6 +7,7 @@ import com.azyron.client.common.ColorUtil;
 import com.azyron.client.common.HudElementConfig;
 import com.azyron.client.common.HudElementSizes;
 import com.azyron.client.flavor.screen.BaseAzyronScreen;
+import com.azyron.client.flavor.ui.Navigation;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -145,7 +146,7 @@ public final class HudSettingsScreen extends BaseAzyronScreen {
 
 		this.editLayoutButton = this.addRenderableWidget(Button.builder(
 				Component.literal("DRAG LAYOUT EDITOR"),
-				button -> this.minecraft.setScreen(new HudEditScreen()))
+				button -> Navigation.open(this.minecraft, new HudEditScreen()))
 				.pos(12, rowTop)
 				.size(editWidth, 18)
 				.build());
@@ -163,7 +164,7 @@ public final class HudSettingsScreen extends BaseAzyronScreen {
 
 		this.backButton = this.addRenderableWidget(Button.builder(
 				Component.literal("BACK"),
-				button -> this.minecraft.setScreen(new AzyronHomeScreen()))
+				button -> Navigation.open(this.minecraft, new AzyronHomeScreen()))
 				.pos(this.width - 12 - backWidth, rowTop)
 				.size(backWidth, 18)
 				.build());
