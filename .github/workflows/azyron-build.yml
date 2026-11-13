@@ -98,6 +98,22 @@ jobs:
           set -o pipefail
           ./gradlew ":versions:${{ matrix.project }}:build" --console=plain --stacktrace 2>&1 | tee "build-${{ matrix.minecraft }}.log"
 
+      - name: Show build result in run summary
+        if: always()
+        run: |
+          {
+            echo "### MC ${{ matrix.minecraft }} (Java ${{ matrix.java }})"
+            if [ -f "build-${{ matrix.minecraft }}.log" ]; then
+              echo '```'
+              grep -E "error:|warning: \[|Execution failed|What went wrong|Caused by|^e: |FAILURE:|BUILD SUCCESSFUL|BUILD FAILED" \
+                "build-${{ matrix.minecraft }}.log" | head -40 || echo "(no compiler errors matched)"
+              echo '```'
+            else
+              echo "_no build log produced_"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
       - name: Validate produced jar (entrypoints, mixins, icon, metadata)
         if: success()
         run: |
