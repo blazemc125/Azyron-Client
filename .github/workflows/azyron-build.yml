@@ -9,8 +9,10 @@
 # Mojang). Build logs are uploaded as workflow artifacts.
 #
 # This workflow does not modify or replace any other workflow in this
-# repository and does not create releases; artifacts can be downloaded from
-# the workflow run page.
+# repository. Artifacts are always downloadable from the run page. In
+# addition, a manual "Run workflow" with publish=prerelease creates a GitHub
+# PRE-RELEASE tagged v3.0.0-pre and attaches the four jars. That publish job
+# only runs on workflow_dispatch - a push or pull request never publishes.
 
 name: AZYRON CLIENT V3 Build
 
@@ -24,11 +26,21 @@ on:
       - 'azyron-client/**'
       - '.github/workflows/azyron-build.yml'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish a v3.0.0-pre pre-release with the built jars'
+        type: choice
+        options:
+          - 'none'
+          - 'prerelease'
+        default: 'none'
 
 concurrency:
   group: azyron-build-${{ github.ref }}
   cancel-in-progress: true
 
+# Default for every job: build-only. The publish job below grants itself
+# contents: write explicitly, so nothing else in this workflow can write.
 permissions:
   contents: read
 
@@ -143,3 +155,72 @@ jobs:
           path: azyron-client/build-${{ matrix.minecraft }}.log
           if-no-files-found: ignore
           retention-days: 30
+
+  # ---------------------------------------------------------------------
+  # Optional pre-release. Runs ONLY on a manual "Run workflow" with
+  # publish=prerelease, and only if every build job in the matrix passed.
+  # A push or pull request can never reach this job.
+  # ---------------------------------------------------------------------
+  prerelease:
+    name: Publish v3.0.0-pre pre-release
+    needs: build
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.publish == 'prerelease'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all built jars
+        uses: actions/download-artifact@v4
+        with:
+          pattern: azyron-client-*
+          path: staging
+          merge-multiple: true
+
+      - name: Keep only the shippable jars and verify them
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          shopt -s globstar nullglob
+          found=0
+          for jar in staging/**/*.jar; do
+            name="$(basename "$jar")"
+            case "$name" in
+              *-sources.jar|*-dev.jar) echo "skipping non-shippable $name"; continue ;;
+            esac
+            python3 azyron-client/docs/validate-jar.py "$jar"
+            cp "$jar" "release-assets/$name"
+            found=$((found + 1))
+          done
+          echo "shippable jars: $found"
+          if [ "$found" -ne 4 ]; then
+            echo "::error::Expected 4 jars (one per Minecraft version), got $found."
+            exit 1
+          fi
+          ls -l release-assets
+
+      - name: Create the pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="v3.0.0-pre"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG already exists. Delete it in the Releases"
+            echo "::error::page before running this again - this job never overwrites."
+            exit 1
+          fi
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "AZYRON CLIENT V3 - pre-release (untested build)" \
+            --notes-file azyron-client/release/PRE-RELEASE-NOTES.md \
+            release-assets/*.jar
+          echo "### Pre-release published" >> "$GITHUB_STEP_SUMMARY"
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url --jq '.url' >> "$GITHUB_STEP_SUMMARY"

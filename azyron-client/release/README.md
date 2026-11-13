@@ -13,6 +13,29 @@ artifacts (`azyron-client-<mc>`).
 | `26.2/` | 26.2 | 25 | 0.161.0+26.2 |
 | `26.3/` | 26.3 | 25 | 0.165.2+26.3 |
 
+## Quick download (pre-release)
+
+The fastest path to a downloadable jar is the **pre-release** job:
+
+1. Actions → **AZYRON CLIENT V3 Build** → **Run workflow**.
+2. Set `publish` to **prerelease**, keep the branch you want to build.
+3. Wait for the four build jobs, then the `Publish v3.0.0-pre pre-release` job.
+4. The jars appear at:
+
+   ```
+   https://github.com/blazemc125/Azyron-Client/releases/tag/v3.0.0-pre
+   ```
+
+That job refuses to publish unless all four matrix builds passed, refuses
+anything that is not a shippable jar (`-sources` / `-dev` are skipped), runs
+`docs/validate-jar.py` on each jar, requires exactly four jars, and will not
+overwrite an existing `v3.0.0-pre` — delete the old one first.
+
+It is a **pre-release**: untested in-game, so it is not announced as 3.0.0.
+
+If `publish` stays `none` (the default), the workflow only builds and uploads
+run artifacts, exactly as before.
+
 ## Producing a genuine release (owner)
 
 1. Push the branch (agents in this repo may not push — this is a human step).
