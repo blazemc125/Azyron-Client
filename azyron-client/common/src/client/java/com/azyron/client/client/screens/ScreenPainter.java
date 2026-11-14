@@ -12,13 +12,30 @@ public final class ScreenPainter {
 	private ScreenPainter() {
 	}
 
+	/** Spacing of the decorative dot lattice, in GUI pixels. */
+	private static final int DOT_SPACING = 32;
+
+	/** Above this many dots the lattice is thinned out on large GUI sizes. */
+	private static final int DOT_BUDGET = 160;
+
 	/** Dark premium backdrop with a subtle dot lattice. */
 	public static void background(AzyronUi ui) {
 		ui.fill(0, 0, ui.width(), ui.height(), AzyronConstants.COLOR_BACKGROUND);
 
+		int width = ui.width();
+		int height = ui.height();
 		int dot = 0x14FFFFFF;
-		for (int y = 12; y < ui.height(); y += 32) {
-			for (int x = 12; x < ui.width(); x += 32) {
+
+		// Each dot is a separate quad. A large GUI would issue ~2000 quads per
+		// frame for pure decoration, which phone GPUs such as the Adreno 610
+		// feel, so wide screens get a wider lattice at the same visual density.
+		int spacing = DOT_SPACING;
+		while (((width / spacing) + 1) * ((height / spacing) + 1) > DOT_BUDGET) {
+			spacing += 8;
+		}
+
+		for (int y = 12; y < height; y += spacing) {
+			for (int x = 12; x < width; x += spacing) {
 				ui.fill(x, y, x + 1, y + 1, dot);
 			}
 		}

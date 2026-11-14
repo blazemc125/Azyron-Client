@@ -93,8 +93,22 @@ public final class AzyronHudRenderer {
 		ui.text(text, x, y, AzyronConstants.COLOR_BLUE);
 	}
 
+	// Precomputed integer renderings. String.valueOf on every frame allocates on
+	// the render thread; on a 3 GB Adreno 610 device that turns into GC stutter.
+	private static final String[] SMALL_INTS = new String[512];
+
+	static {
+		for (int i = 0; i < SMALL_INTS.length; i++) {
+			SMALL_INTS[i] = Integer.toString(i);
+		}
+	}
+
+	private static String cachedInt(int value) {
+		return value >= 0 && value < SMALL_INTS.length ? SMALL_INTS[value] : Integer.toString(value);
+	}
+
 	private static void drawFps(AzyronUi ui, HudElementConfig element, int x, int y, int fps) {
-		String value = fps > 0 ? String.valueOf(fps) : "--";
+		String value = fps > 0 ? cachedInt(fps) : "--";
 		int width = PANEL_PADDING + ui.textWidth("FPS") + 4 + ui.textWidth(value) + PANEL_PADDING;
 		panel(ui, x, y, width, PANEL_HEIGHT);
 		label(ui, "FPS", x + PANEL_PADDING, y + 3);
@@ -103,8 +117,8 @@ public final class AzyronHudRenderer {
 
 	private static void drawCps(AzyronUi ui, AzyronClientState state, HudElementConfig element, int x, int y, long now) {
 		KeyTracker tracker = state.keyTracker();
-		String left = String.valueOf(tracker.leftCps(now));
-		String right = String.valueOf(tracker.rightCps(now));
+		String left = cachedInt(tracker.leftCps(now));
+		String right = cachedInt(tracker.rightCps(now));
 		String value = "L " + left + "   R " + right;
 		int width = PANEL_PADDING + ui.textWidth("CPS") + 4 + ui.textWidth(value) + PANEL_PADDING;
 		panel(ui, x, y, width, PANEL_HEIGHT);
@@ -146,7 +160,7 @@ public final class AzyronHudRenderer {
 	}
 
 	private static void drawArmor(AzyronUi ui, HudElementConfig element, int x, int y, int armor) {
-		String value = armor >= 0 ? String.valueOf(armor) : "--";
+		String value = armor >= 0 ? cachedInt(armor) : "--";
 		int barWidth = 44;
 		int width = PANEL_PADDING + 26 + barWidth + 6 + ui.textWidth(value) + PANEL_PADDING;
 		panel(ui, x, y, width, PANEL_HEIGHT);
@@ -191,7 +205,8 @@ public final class AzyronHudRenderer {
 		ui.fill(x, y, x + 28, y + 15, down ? ColorUtil.withAlpha(AzyronConstants.COLOR_PURPLE_DARK, 0xE6) : AzyronConstants.COLOR_PANEL_RAISED);
 		ui.fill(x, y, x + 28, y + 1, AzyronConstants.COLOR_BORDER_BRIGHT);
 		ui.text(label, x + 3, y + 3, AzyronConstants.COLOR_TEXT_DIM);
-		ui.text(String.valueOf(cps), x + 28 - 4 - ui.textWidth(String.valueOf(cps)), y + 3,
+		String cpsText = cachedInt(cps);
+		ui.text(cpsText, x + 28 - 4 - ui.textWidth(cpsText), y + 3,
 				cps > 0 ? AzyronConstants.COLOR_WHITE : AzyronConstants.COLOR_TEXT_DIM);
 	}
 
